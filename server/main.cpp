@@ -9,6 +9,16 @@ using json = nlohmann::json;
 int main() {
     httplib::Server svr;
 
+    svr.set_post_routing_handler([](const httplib::Request&, httplib::Response& res) {
+        res.set_header("Access-Control-Allow-Origin", "*");
+        res.set_header("Access-Control-Allow-Methods", "POST, OPTIONS");
+        res.set_header("Access-Control-Allow-Headers", "Content-Type");
+    });
+
+    svr.Options(".*", [](const httplib::Request&, httplib::Response& res) {
+        res.status = 204;
+    });
+
     svr.Post("/api/distance", [](const httplib::Request& req, httplib::Response& res) {
         auto body = json::parse(req.body);
         cg::Point2D a(body["points"][0]["x"], body["points"][0]["y"]);
