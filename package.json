@@ -1,0 +1,14 @@
+{
+  "name": "computational-geometry",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix frontend\" \"./backend/build/server/server\"",
+    "build:backend": "cmake --build backend/build",
+    "build:frontend": "npm run build --prefix frontend",
+    "build": "npm run build:backend && npm run build:frontend",
+    "cmake": "cmake -B backend/build -S backend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-
-type Point2D = { x: number; y: number }
+import type { Point2D } from './types'
 
 function App() {
   const [dark, setDark] = useState(true)
