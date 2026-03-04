@@ -14,32 +14,38 @@ namespace cg {
             throw std::invalid_argument("At least 3 points are required to compute a convex hull.");
         }
 
-        std::vector<Point2D> hull;
+        std::vector<std::pair<Point2D, Point2D>> hull_edges;
         for (Point2D current : points) {
             for (Point2D next : points) {
-                if (current.x == next.x && current.y == next.y) {
-                    continue;
-                }
+                if (current.x == next.x && current.y == next.y) continue;
                 bool is_left = true;
                 for (Point2D other : points) {
-                    if (other.x == current.x && other.y == current.y) {
-                        continue;
-                    }
-                    if (other.x == next.x && other.y == next.y) {
-                        continue;
-                    }
-                    double cross_product = cg::cross_product(current, next, other);
-                    if (cross_product < 0) {
+                    if (other.x == current.x && other.y == current.y) continue;
+                    if (other.x == next.x && other.y == next.y) continue;
+                    if (cg::cross_product(current, next, other) < 0) {
                         is_left = false;
                         break;
                     }
                 }
                 if (is_left) {
-                    hull.push_back(current);
-                    break;
-        }
+                    hull_edges.push_back({current, next});
+                }
             }
         }
+
+        std::vector<Point2D> hull;
+        hull.push_back(hull_edges[0].first);
+        Point2D target = hull_edges[0].second;
+        while (!(target.x == hull[0].x && target.y == hull[0].y)) {
+            hull.push_back(target);
+            for (const auto& edge : hull_edges) {
+                if (edge.first.x == target.x && edge.first.y == target.y) {
+                    target = edge.second;
+                    break;
+                }
+            }
+        }
+
         return Polygon2D(hull, true);
     }
 
