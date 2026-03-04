@@ -3,13 +3,13 @@
 #include <algorithm>
 #include "primitives/Point2D.h"
 #include "primitives/predicates.h"
-#include "algorithms/sortPoint2D.h"
-#include "algorithms/ConvexHull.h"
+#include "algorithms/sort_points_2d.h"
+#include "algorithms/convex_hull.h"
 
 namespace cg {
 
 
-    Polygon2D SlowConvexHull(const std::vector<Point2D>& points) {
+    Polygon2D slow_convex_hull(const std::vector<Point2D>& points) {
         if (points.size() < 3) {
             throw std::invalid_argument("At least 3 points are required to compute a convex hull.");
         }
@@ -20,7 +20,7 @@ namespace cg {
                 if (current.x == next.x && current.y == next.y) {
                     continue;
                 }
-                bool isLeft = true;
+                bool is_left = true;
                 for (Point2D other : points) {
                     if (other.x == current.x && other.y == current.y) {
                         continue;
@@ -28,56 +28,56 @@ namespace cg {
                     if (other.x == next.x && other.y == next.y) {
                         continue;
                     }
-                    double crossProduct = cg::crossProduct(current, next, other);
-                    if (crossProduct < 0) {
-                        isLeft = false;
+                    double cross_product = cg::cross_product(current, next, other);
+                    if (cross_product < 0) {
+                        is_left = false;
                         break;
                     }
                 }
-                if (isLeft) {
+                if (is_left) {
                     hull.push_back(current);
                     break;
         }
             }
         }
-        return Polygon2D(hull);
+        return Polygon2D(hull, true);
     }
 
-    Polygon2D convexHullGrahamsScan(const std::vector<Point2D>& points) {
+    Polygon2D convex_hull_grahams_scan(const std::vector<Point2D>& points) {
         if (points.size() < 3) {
             throw std::invalid_argument("At least 3 points are required to compute a convex hull.");
         }
 
-        std::vector<Point2D> sortedPoints = sortbyX(points);
+        std::vector<Point2D> sorted_points = sort_by_x(points);
         std::vector<Point2D> hull;
 
-        std::vector<Point2D> upperHull;
-        for (int i = (int)sortedPoints.size() - 1; i >= 0; --i) {
-            while (upperHull.size() >= 2 &&
-                cg::crossProduct(upperHull[upperHull.size() - 2], upperHull.back(), sortedPoints[i]) <= 0) {
-                upperHull.pop_back();
+        std::vector<Point2D> upper_hull;
+        for (int i = (int)sorted_points.size() - 1; i >= 0; --i) {
+            while (upper_hull.size() >= 2 &&
+                cg::cross_product(upper_hull[upper_hull.size() - 2], upper_hull.back(), sorted_points[i]) <= 0) {
+                upper_hull.pop_back();
             }
-            upperHull.push_back(sortedPoints[i]);
+            upper_hull.push_back(sorted_points[i]);
         }
 
-        std::vector<Point2D> lowerHull;
-        lowerHull.push_back(sortedPoints[0]);
-        lowerHull.push_back(sortedPoints[1]);
-        for (size_t i = 2; i < sortedPoints.size(); ++i) {
-            while (lowerHull.size() >= 2 &&
-                cg::crossProduct(lowerHull[lowerHull.size() - 2], lowerHull.back(), sortedPoints[i]) <= 0) {
-                lowerHull.pop_back();
+        std::vector<Point2D> lower_hull;
+        lower_hull.push_back(sorted_points[0]);
+        lower_hull.push_back(sorted_points[1]);
+        for (size_t i = 2; i < sorted_points.size(); ++i) {
+            while (lower_hull.size() >= 2 &&
+                cg::cross_product(lower_hull[lower_hull.size() - 2], lower_hull.back(), sorted_points[i]) <= 0) {
+                lower_hull.pop_back();
             }
-            lowerHull.push_back(sortedPoints[i]);
+            lower_hull.push_back(sorted_points[i]);
         }
 
-        hull.insert(hull.end(), upperHull.begin(), upperHull.end() - 1);
-        hull.insert(hull.end(), lowerHull.begin(), lowerHull.end() - 1);
-        return Polygon2D(hull);
+        hull.insert(hull.end(), upper_hull.begin(), upper_hull.end() - 1);
+        hull.insert(hull.end(), lower_hull.begin(), lower_hull.end() - 1);
+        return Polygon2D(hull, true);
     }
 
 
-    Polygon2D convexHullJarvisMarch(const std::vector<Point2D>& points) {
+    Polygon2D convex_hull_jarvis_march(const std::vector<Point2D>& points) {
         if (points.size() < 3) {
             throw std::invalid_argument("At least 3 points are required to compute a convex hull.");
         }
@@ -98,8 +98,8 @@ namespace cg {
             int next = (current + 1) % points.size();
 
             for (size_t i = 0; i < points.size(); ++i) {
-                double crossProduct = cg::crossProduct(points[current], points[next], points[i]);
-                if (crossProduct < 0) {
+                double cross_product = cg::cross_product(points[current], points[next], points[i]);
+                if (cross_product < 0) {
                     next = i;
                 }
             }
@@ -107,6 +107,6 @@ namespace cg {
             current = next;
         } while (current != leftmost);
 
-        return Polygon2D(hull);
+        return Polygon2D(hull, true);
     }
 }

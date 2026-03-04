@@ -1,7 +1,7 @@
 #include "primitives/Point2D.h"
 #include "primitives/Polygon2D.h"
 #include "algorithms/distance.h"
-#include "algorithms/ConvexHull.h"
+#include "algorithms/convex_hull.h"
 #include "primitives/Segment2D.h"
 #include "httplib.h"
 #include "nlohmann/json.hpp"
@@ -25,7 +25,7 @@ int main() {
         auto body = json::parse(req.body);
         cg::Point2D a(body["points"][0]["x"], body["points"][0]["y"]);
         cg::Point2D b(body["points"][1]["x"], body["points"][1]["y"]);
-        json result = { {"distance", cg::distance2D(a, b)} };
+        json result = { {"distance", cg::distance_2d(a, b)} };
         res.set_content(result.dump(), "application/json");
     });
 
@@ -34,7 +34,7 @@ int main() {
         cg::Point2D a(body["points"][0]["x"], body["points"][0]["y"]);
         cg::Point2D b(body["points"][1]["x"], body["points"][1]["y"]);
         cg::Segment2D segment(a, b);
-        json result = { {"length", cg::segment2DLength(segment)} };
+        json result = { {"length", cg::segment_2d_length(segment)} };
         res.set_content(result.dump(), "application/json");
     });
 
@@ -44,25 +44,27 @@ int main() {
         for (const auto& point : body["points"]) {
             points.emplace_back(point["x"], point["y"]);
         }
-        cg::Polygon2D hull = cg::SlowConvexHull(points);
-        json result;
+        cg::Polygon2D hull = cg::slow_convex_hull(points);
+        json vertices = json::array();
         for (const auto& point : hull.vertices) {
-            result["hull"].push_back({ {"x", point.x}, {"y", point.y} });
+            vertices.push_back({ {"x", point.x}, {"y", point.y} });
         }
+        json result = { {"polygon", { {"vertices", vertices}, {"is_closed", hull.is_closed} }} };
         res.set_content(result.dump(), "application/json");
     });
 
-    svr.Post("/api/convex-hull/grahams-scan", [](const httplib::Request& req, httplib::Response& res) {
+    svr.Post("/api/convex-hull/graham-scan", [](const httplib::Request& req, httplib::Response& res) {
         auto body = json::parse(req.body);
         std::vector<cg::Point2D> points;
         for (const auto& point : body["points"]) {
             points.emplace_back(point["x"], point["y"]);
         }
-        cg::Polygon2D hull = cg::convexHullGrahamsScan(points);
-        json result;
+        cg::Polygon2D hull = cg::convex_hull_grahams_scan(points);
+        json vertices = json::array();
         for (const auto& point : hull.vertices) {
-            result["hull"].push_back({ {"x", point.x}, {"y", point.y} });
+            vertices.push_back({ {"x", point.x}, {"y", point.y} });
         }
+        json result = { {"polygon", { {"vertices", vertices}, {"is_closed", hull.is_closed} }} };
         res.set_content(result.dump(), "application/json");
     });
 
@@ -72,11 +74,12 @@ int main() {
         for (const auto& point : body["points"]) {
             points.emplace_back(point["x"], point["y"]);
         }
-        cg::Polygon2D hull = cg::convexHullJarvisMarch(points);
-        json result;
+        cg::Polygon2D hull = cg::convex_hull_jarvis_march(points);
+        json vertices = json::array();
         for (const auto& point : hull.vertices) {
-            result["hull"].push_back({ {"x", point.x}, {"y", point.y} });
+            vertices.push_back({ {"x", point.x}, {"y", point.y} });
         }
+        json result = { {"polygon", { {"vertices", vertices}, {"is_closed", hull.is_closed} }} };
         res.set_content(result.dump(), "application/json");
     });
 

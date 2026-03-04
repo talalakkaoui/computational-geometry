@@ -5,7 +5,7 @@
 
 namespace cg {
 
-double distance2D(const Point2D& a, const Point2D& b);
+double distance_2d(const Point2D& a, const Point2D& b);
 
-double segment2DLength(Segment2D segment);
+double segment_2d_length(Segment2D segment);
 }
