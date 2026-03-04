@@ -1,6 +1,7 @@
 add_library(core
-    src/primitives/Point2D.cpp
     src/algorithms/distance.cpp
+    src/algorithms/ConvexHull.cpp
+    src/algorithms/sortPoint2D.cpp
 )
 
 target_include_directories(core PUBLIC include)
