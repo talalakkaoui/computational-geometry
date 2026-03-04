@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import type { Point2D, Theme } from '../types'
+import type { Polygon2D, Point2D, Theme } from '../types'
 
 type PointEntry = { point: Point2D; label: string; color: string }
 
@@ -7,9 +7,10 @@ type CanvasProps = {
   points: PointEntry[]
   onPointClick: (p: Point2D) => void
   theme: Theme
+  polygon?: Polygon2D
 }
 
-export default function Canvas({ points, onPointClick, theme }: CanvasProps) {
+export default function Canvas({ points, onPointClick, theme, polygon }: CanvasProps) {
   const [width, setWidth] = useState(window.innerWidth * 0.8)
   const [height, setHeight] = useState(window.innerHeight * 0.8)
 
@@ -78,6 +79,14 @@ export default function Canvas({ points, onPointClick, theme }: CanvasProps) {
           )}
         </g>
       ))}
+
+      {/* Polygon */}
+      {polygon && (() => {
+        const svgPoints = polygon.vertices.map((p: Point2D) => `${p.x * stepX + centerX},${-p.y * stepY + centerY}`).join(' ')
+        return polygon.isClosed
+          ? <polygon points={svgPoints} fill="rgba(79, 195, 247, 0.15)" stroke="#4fc3f7" strokeWidth={2} />
+          : <polyline points={svgPoints} fill="none" stroke="#4fc3f7" strokeWidth={2} />
+      })()}
 
       {/* Points */}
       {points.map(({ point, label, color }) => (
