@@ -8,49 +8,54 @@ type OutletContext = { theme: Theme }
 
 export default function DistancePage() {
   const { theme } = useOutletContext<OutletContext>()
-  const [pointA, setPointA] = useState<Point2D | null>(null)
-  const [pointB, setPointB] = useState<Point2D | null>(null)
+  const [selectedPoints, setSelectedPoints] = useState<Point2D[]>([])
   const [distance, setDistance] = useState<number | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
-  function handlePointClick(p: Point2D) {
-    if (!pointA) {
-      setPointA(p)
-    } else if (!pointB) {
-      setPointB(p)
+  function handleShapeComplete(pts: Point2D[]) {
+    if (pts.length !== 1) {
+      setError('Please click a single point and press Enter.')
+      return
     }
+    setError(null)
+    setSelectedPoints(prev => [...prev, pts[0]])
   }
 
   async function calculateDistance() {
-    if (!pointA || !pointB) return
-    const d = await fetchDistance(pointA, pointB)
+    if (selectedPoints.length > 2) {
+      setError('Distance requires exactly 2 points.')
+      return
+    }
+    if (selectedPoints.length < 2) return
+    const d = await fetchDistance(selectedPoints[0], selectedPoints[1])
     setDistance(d)
   }
 
   function reset() {
-    setPointA(null)
-    setPointB(null)
+    setSelectedPoints([])
     setDistance(null)
+    setError(null)
   }
 
-  const points = [
-    ...(pointA ? [{ point: pointA, label: 'A', color: 'royalblue' }] : []),
-    ...(pointB ? [{ point: pointB, label: 'B', color: 'tomato' }] : []),
-  ]
+  const colors = ['royalblue', 'tomato']
+  const labels = ['A', 'B']
+  const points = selectedPoints.map((p, i) => ({ point: p, label: labels[i] ?? String(i + 1), color: colors[i] ?? 'gray' }))
 
   return (
     <div>
       <h2 style={{ marginTop: 0 }}>Point Distance</h2>
       <p style={{ color: theme.tickText, marginBottom: 16 }}>
-        Click two points on the canvas to calculate the Euclidean distance between them.
+        Click a point then press Enter or Space. Do this twice to set points A and B.
       </p>
 
-      <Canvas points={points} onPointClick={handlePointClick} theme={theme} />
+      <Canvas points={points} onShapeComplete={handleShapeComplete} theme={theme} />
 
+      {error && <p style={{ color: 'tomato', marginTop: 8 }}>{error}</p>}
       <div style={{ marginTop: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
-        {pointA && pointB && (
+        {selectedPoints.length === 2 && (
           <button onClick={calculateDistance}>Calculate Distance</button>
         )}
-        {(pointA || pointB) && (
+        {selectedPoints.length > 0 && (
           <button onClick={reset}>Reset</button>
         )}
         {distance !== null && (

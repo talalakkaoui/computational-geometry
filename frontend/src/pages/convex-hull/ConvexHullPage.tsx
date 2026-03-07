@@ -18,8 +18,8 @@ export default function ConvexHullPage() {
   const [hull, setHull] = useState<Polygon2D | null>(null)
   const [algorithm, setAlgorithm] = useState<Algorithm>('slow')
 
-  function handlePointClick(p: Point2D) {
-    setPoints(prev => [...prev, p])
+  function handleShapeComplete(pts: Point2D[]) {
+    setPoints(prev => [...prev, ...pts])
     setHull(null)
   }
 
@@ -66,10 +66,14 @@ export default function ConvexHullPage() {
       </div>
 
       <p style={{ color: theme.tickText, marginBottom: 16 }}>
-        Click points on the canvas, then click Calculate to compute the convex hull.
+        Click points then press Enter or Space to add them. Repeat, then click Calculate.
       </p>
 
-      <Canvas points={pointEntries} onPointClick={handlePointClick} theme={theme} polygon={hull ?? undefined} />
+      <Canvas 
+        points={pointEntries} 
+        onShapeComplete={handleShapeComplete} 
+        theme={theme} polygon={hull ?? undefined} 
+      />
 
       <div style={{ marginTop: 16, display: 'flex', gap: 12, alignItems: 'center' }}>
         {points.length >= 3 && (

@@ -1,6 +1,6 @@
 export type Point2D = { x: number; y: number }
 
-export type Segment2D = { start: Point2D; end: Point2D }
+export type Segment2D = [Point2D, Point2D]
 
 export type Polygon2D = { vertices: Point2D[]; isClosed: boolean }
 
