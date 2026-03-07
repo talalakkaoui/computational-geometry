@@ -6,6 +6,7 @@
 #include "primitives/Segment2D.h"
 #include "httplib.h"
 #include "nlohmann/json.hpp"
+#include <cstdlib>
 
 using json = nlohmann::json;
 
@@ -110,6 +111,8 @@ int main() {
         res.set_content(result.dump(), "application/json");
     });
 
-    svr.listen("0.0.0.0", 8080);
+    const char* port_env = std::getenv("PORT");
+    int port = port_env ? std::stoi(port_env) : 8080;
+    svr.listen("0.0.0.0", port);
     return 0;
 }
